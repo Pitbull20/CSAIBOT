@@ -39,33 +39,39 @@ def is_week_even(date_string):
 bot = telebot.TeleBot(config['TOKEN'])
 
 # функція, яка обробляє повідомлення з текстом дати
+
 @bot.message_handler(commands=['start'])
 def start(message):
     bot.reply_to(message, "Привіт :)\nЦей бот завжди підкаже тобі які в тебе пари\nПросто введи дату у форматі 'дд.мм'")
 
-@bot.message_handler(func=lambda message: True)
-def get_day_of_week(message):
+
+def get_day_of_week(date, message):
     try:
-        print(message.text)
         # конвертуємо текст повідомлення в об'єкт дати
-        date_obj = datetime.datetime.strptime(f"{message.text}.2023", '%d.%m.%Y')
+        date_obj = datetime.datetime.strptime(f"{date}.2023", '%d.%m.%Y')
         # отримуємо день тижня з об'єкту дати та відправляємо його користувачу
         day_of_week = date_obj.strftime('%A')
-        if is_week_even(f"{message.text}.2023") == 2:
+        if is_week_even(f"{date}.2023") == 2:
             if day_of_week == 'Saturday' or day_of_week == 'Sunday':
                 bot.reply_to(message, "Сьогодні вихідний, можеш балдіти :)")
                 return
             else:
-                bot.reply_to(message, day_of_week)
                 bot.reply_to(message, schedule[day_of_week]["pair"])
         else:
             if day_of_week == 'Saturday' or day_of_week == 'Sunday':
                 bot.reply_to(message, "Сьогодні вихідний, можеш балдіти :)")
                 return
-            bot.reply_to(message, day_of_week)
             bot.reply_to(message, schedule[day_of_week]["not_even"])
     except ValueError:
         bot.reply_to(message, "Неправильний формат дати! Введіть дату у форматі 'дд.мм'")
+
+
+
+@bot.message_handler(commands=['get'])
+def get(message):
+    date = message.text.split(" ")
+    get_day_of_week(date[1], message)
+
 
 # запускаємо бота
 print("Bot was started")
