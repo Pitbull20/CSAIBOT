@@ -1,7 +1,8 @@
 import telebot
 import datetime
-from config import config
 
+from DataBase.db import DataBase
+from config import config
 
 schedule = {
     "Monday": {
@@ -9,8 +10,8 @@ schedule = {
         "pair": "9:35, каб. 6308: Системне програмування та архітектура комп'ютерів, викладач Осолінський Олександр Романович\n11:10, каб. 6308: Вища математика, викладач Алілуйко Андрій Миколайович\n12:50, каб. 6308: Фізика, викладач Паздрій Ігор Ростиславович"
     },
     "Tuesday": {
-        "not_even": "8:00, каб. 6104: Сучасні парадигми програмування, викладач Биковий Павло Євгенович\n9:35, каб. 6104: Дискретна математика, викладачка Мартинюк Олеся Миронівна" ,
-        "pair":"8:00, каб. 6104: Сучасні парадигми програмування, викладач Биковий Павло Євгенович\n9:35, каб. 6104: Дискретна математика, викладачка Мартинюк Олеся Миронівна\n12:50, актовий зал (1 корпус): Політологія, викладач Томахів Володимир Ярославович" 
+        "not_even": "8:00, каб. 6104: Сучасні парадигми програмування, викладач Биковий Павло Євгенович\n9:35, каб. 6104: Дискретна математика, викладачка Мартинюк Олеся Миронівна",
+        "pair": "8:00, каб. 6104: Сучасні парадигми програмування, викладач Биковий Павло Євгенович\n9:35, каб. 6104: Дискретна математика, викладачка Мартинюк Олеся Миронівна\n12:50, актовий зал (1 корпус): Політологія, викладач Томахів Володимир Ярославович"
     },
     "Wednesday": {
         "not_even": "9:35, каб. 6303: Системне програмування та архітектура комп'ютерів, викладач Кіт Іван Романович\n11:10, каб. 6301: Вища математика, викладач Алілуйко Андрій Миколайович\n12:50, каб. 6302: Фізика, викладач Дериш Богдан Богданович",
@@ -26,6 +27,7 @@ schedule = {
     },
 }
 
+
 def is_week_even(date_string):
     date = datetime.datetime.strptime(date_string, '%d.%m.%Y')
     week_number = date.isocalendar()[1]
@@ -37,6 +39,7 @@ def is_week_even(date_string):
 
 # створюємо екземпляр бота з токеном, який отримано від BotFather
 bot = telebot.TeleBot(config['TOKEN'])
+
 
 # функція, яка обробляє повідомлення з текстом дати
 
@@ -66,11 +69,25 @@ def get_day_of_week(date, message):
         bot.reply_to(message, "Неправильний формат дати! Введіть дату у форматі 'дд.мм'")
 
 
+def is_user_admin(message, bot):
+    for u in bot.get_chat_administrators(message.chat.id):
+        if message.from_user.id == u.user.id:
+            return True
+    return False
+
 
 @bot.message_handler(commands=['get'])
 def get(message):
     date = message.text.split(" ")
     get_day_of_week(date[1], message)
+
+
+# @bot.message_handler(commands=['setgroup'])
+# def setgroup(message):
+#     if is_user_admin(message, bot):
+#         db = DataBase("DataBase.db")
+#         db.create(int(message.chat.id))
+#         db.get_all_elements()
 
 
 # запускаємо бота
